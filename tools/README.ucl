@@ -1,0 +1,7 @@
+This is a simple compressor using the UCL library.
+
+It takes the data from stdin and writes to stdout.
+
+It is limited to MAX_MEM (64kb), but you should be compressing
+way less than that anyway!
+

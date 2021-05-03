@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+import sys
+
+# video memory + back buffer (stack in 0x200)
+TOP_MEM = 0xc000
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit("usage: %s load_addr filename.map" % sys.argv[0])
+
+    load_addr = int(sys.argv[1])
+
+    with open(sys.argv[2], "r") as fd:
+        lines = fd.readlines()
+        # warnings
+        for line in lines:
+            if "l__INITIALIZED" in line:
+                init_size = int(line.split()[0], base=16)
+                if init_size != 0:
+                    print("*WARNING* Initialized data found")
+        # search for HEAP
+        for line in lines:
+            if "s__HEAP" in line:
+                heap_addr = int(line.split()[0], base=16)
+                max_mem = TOP_MEM - load_addr
+                cur_mem = heap_addr - load_addr
+                left_mem = max_mem - cur_mem
+                print("""\
+***
+      Max: {} bytes
+  Current: {} bytes ({} bytes left)
+***
+""".format(max_mem, cur_mem, left_mem))
+                sys.exit(0)
+
+    sys.exit("HEAP size not found")
+
+
+if __name__ == "__main__":
+    main()
